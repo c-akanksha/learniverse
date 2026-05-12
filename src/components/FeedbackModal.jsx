@@ -1,0 +1,252 @@
+import React, { useMemo } from "react";
+import {
+  Dialog,
+  DialogContent,
+  Typography,
+  Box,
+  Card,
+  CardContent,
+  Stack,
+  LinearProgress,
+  Chip,
+} from "@mui/material";
+
+import AutoAwesomeRoundedIcon from "@mui/icons-material/AutoAwesomeRounded";
+import PsychologyRoundedIcon from "@mui/icons-material/PsychologyRounded";
+import TrendingUpRoundedIcon from "@mui/icons-material/TrendingUpRounded";
+import TipsAndUpdatesRoundedIcon from "@mui/icons-material/TipsAndUpdatesRounded";
+import WorkspacePremiumRoundedIcon from "@mui/icons-material/WorkspacePremiumRounded";
+
+const getMood = (score) => {
+  if (score >= 85)
+    return {
+      emoji: "🌌",
+      text: "Cosmic Performance",
+      color: "#00ff9d",
+      glow: "rgba(0,255,157,0.35)",
+    };
+
+  if (score >= 70)
+    return {
+      emoji: "✨",
+      text: "Strong Understanding",
+      color: "#00C2FF",
+      glow: "rgba(0,194,255,0.35)",
+    };
+
+  return {
+    emoji: "🪐",
+    text: "Keep Exploring",
+    color: "#ffb86b",
+    glow: "rgba(255,184,107,0.35)",
+  };
+};
+
+export default function FeedbackModal({
+  open,
+  onClose,
+  feedback = {},
+}) {
+  const score = (feedback?.total_score || 0) * 10;
+
+  const mood = useMemo(() => getMood(score), [score]);
+
+  const showStrengths = feedback?.strengths?.length > 0;
+  const showImprovements = feedback?.improvements?.length > 0;
+
+  return (
+    <Dialog
+      open={open}
+      onClose={onClose}
+      fullWidth
+      maxWidth="sm"
+      sx={{
+        "& .MuiDialog-paper": {
+          background:
+            "linear-gradient(145deg, rgba(10,14,35,0.98), rgba(5,8,20,0.99))",
+          border: "1px solid rgba(127,90,240,0.22)",
+          borderRadius: "30px",
+          color: "white",
+          backdropFilter: "blur(30px)",
+          overflow: "hidden",
+        },
+      }}
+    >
+      <DialogContent sx={{ p: { xs: 2.5, sm: 4 }, maxHeight: "85vh" }}>
+        {/* HERO */}
+        <Box sx={{ textAlign: "center", mb: 4, position: "relative" }}>
+          <Box
+            sx={{
+              position: "absolute",
+              width: 180,
+              height: 180,
+              mx: "auto",
+              inset: 0,
+              borderRadius: "50%",
+              background: `radial-gradient(circle, ${mood.glow}, transparent 70%)`,
+              filter: "blur(25px)",
+            }}
+          />
+
+          <Typography sx={{ fontSize: { xs: "3rem", sm: "4rem" } }}>
+            {mood.emoji}
+          </Typography>
+
+          <Typography
+            sx={{
+              fontSize: { xs: "2.5rem", sm: "3.5rem" },
+              fontWeight: 800,
+              color: mood.color,
+              textShadow: `0 0 25px ${mood.glow}`,
+            }}
+          >
+            {feedback?.total_score}/10
+          </Typography>
+
+          <Typography sx={{ mt: 1, fontWeight: 700, opacity: 0.9 }}>
+            {mood.text}
+          </Typography>
+
+          <Box sx={{ mt: 3 }}>
+            <LinearProgress
+              variant="determinate"
+              value={score}
+              sx={{
+                height: 10,
+                borderRadius: 999,
+                bgcolor: "rgba(255,255,255,0.08)",
+                "& .MuiLinearProgress-bar": {
+                  borderRadius: 999,
+                  background: `linear-gradient(90deg,#7F5AF0,${mood.color})`,
+                },
+              }}
+            />
+          </Box>
+        </Box>
+
+        {/* AI SUMMARY */}
+        <Card sx={cardBase}>
+          <CardContent>
+            <SectionHeader
+              icon={<PsychologyRoundedIcon />}
+              title="AI Evaluation"
+              color="#7F5AF0"
+            />
+            <Typography sx={textStyle}>
+              {feedback?.correctness_summary}
+            </Typography>
+          </CardContent>
+        </Card>
+
+        {/* SECTIONS */}
+        {showStrengths && (
+          <SectionCard
+            title="Strengths"
+            icon={<TrendingUpRoundedIcon />}
+            color="#00ff9d"
+            items={feedback.strengths}
+          />
+        )}
+
+        {showImprovements && (
+          <SectionCard
+            title="Improvements"
+            icon={<TipsAndUpdatesRoundedIcon />}
+            color="#ffb86b"
+            items={feedback.improvements}
+          />
+        )}
+
+        {/* FINAL */}
+        {feedback?.final_feedback && (
+          <Card sx={finalCard}>
+            <CardContent>
+              <SectionHeader
+                icon={<WorkspacePremiumRoundedIcon />}
+                title="Final Insight"
+                color="#00C2FF"
+              />
+              <Typography sx={textStyle}>
+                {feedback.final_feedback}
+              </Typography>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* FOOTER */}
+        <Box sx={{ textAlign: "center", mt: 4, opacity: 0.55 }}>
+          <Stack direction="row" spacing={1} justifyContent="center">
+            <AutoAwesomeRoundedIcon fontSize="small" />
+            <Typography fontSize="0.85rem">
+              Feedback generated by Learniverse AI
+            </Typography>
+          </Stack>
+        </Box>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/* ---------------- REUSABLE UI ---------------- */
+
+const cardBase = {
+  mb: 3,
+  borderRadius: "22px",
+  background: "rgba(255,255,255,0.04)",
+  border: "1px solid rgba(255,255,255,0.08)",
+  color: "white",
+};
+
+const finalCard = {
+  mt: 3,
+  borderRadius: "22px",
+  background:
+    "linear-gradient(135deg, rgba(127,90,240,0.14), rgba(0,194,255,0.08))",
+  border: "1px solid rgba(127,90,240,0.18)",
+  color: "white",
+};
+
+const textStyle = {
+  color: "rgba(255,255,255,0.75)",
+  lineHeight: 1.8,
+};
+
+function SectionHeader({ icon, title, color }) {
+  return (
+    <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 2 }}>
+      <Box sx={{ color }}>{icon}</Box>
+      <Typography sx={{ fontWeight: 700, color }}>{title}</Typography>
+    </Stack>
+  );
+}
+
+function SectionCard({ title, icon, color, items }) {
+  return (
+    <Card sx={cardBase}>
+      <CardContent>
+        <SectionHeader icon={icon} title={title} color={color} />
+
+        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+          {items.map((item, i) => (
+            <Chip
+              key={i}
+              label={item}
+              sx={{
+                bgcolor: `${color}12`,
+                color: "white",
+                border: `1px solid ${color}35`,
+                maxWidth: "100%",
+                "& .MuiChip-label": {
+                  whiteSpace: "normal",
+                  wordBreak: "break-word",
+                  lineHeight: 1.6,
+                  py: 0.8,
+                },
+              }}
+            />
+          ))}
+        </Box>
+      </CardContent>
+    </Card>
+  );
+}
