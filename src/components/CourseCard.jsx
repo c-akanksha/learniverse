@@ -214,6 +214,8 @@ export default function CourseCard({
                 component="a"
                 href={module?.reference}
                 target="_blank"
+                rel="noopener noreferrer"
+                clickable
                 sx={getChipStyles(
                   "rgba(127,90,240,0.12)",
                   "#d5c5ff",
